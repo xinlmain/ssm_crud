@@ -24,7 +24,7 @@ public class EmployeeController {
         PageHelper.startPage(pn, 5);
         List<Employee> emps = employeeService.getAll();
 
-        PageInfo page = new PageInfo(emps);
+        PageInfo page = new PageInfo(emps, 5);
         model.addAttribute("pageInfo", page);
         return "list";
     }
