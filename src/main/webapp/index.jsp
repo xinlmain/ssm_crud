@@ -256,7 +256,28 @@
         });
     }
 
+    function validate_add_form() {
+        var empName = $("#empName_add_input").val();
+        var regName = /(^[a-zA-Z0-9_-]{6,16}$)|(^[\u2E80-\u9FFF]{2,5}$)/;
+        if (!regName.test(empName)) {
+            alert("用户名可以是2-5位中文或者6-16位英文和数字的组合。");
+            return false;
+        }
+
+        var email = $("#email_add_input").val();
+        var regEmail = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+        if (!regEmail.test(email)) {
+            alert("邮箱格式不正确！");
+            return false;
+        }
+        return true;
+    }
+
     $("#emp_save_btn").click(function () {
+
+        if (!validate_add_form()) {
+            return false;
+        }
 
         $.ajax({
             url: "${APP_PATH}/emps",
