@@ -235,7 +235,10 @@
     }
 
     $("#emp_add_modal_btn").click(function () {
+
+        $("#empAddModal form")[0].reset();
         getDepts();
+
         $("#empAddModal").modal({
             //backdrop: "static"
         });
@@ -267,6 +270,7 @@
             $(ele).next("span").text(msg);
         } else {
             $(ele).parent().addClass("has-success");
+            $(ele).next("span").text(msg);
         }
     }
 
@@ -298,6 +302,9 @@
         if (!validate_add_form()) {
             return false;
         }
+        if (this.attr("ajax-va") == "error") {
+            return false;
+        }
 
         $.ajax({
             url: "${APP_PATH}/emps",
@@ -310,6 +317,24 @@
             }
         });
 
+    });
+
+    $("#empName_add_input").change(function () {
+        var empName = this.value;
+        $.ajax({
+            url: "${APP_PATH}/checkuser",
+            data: "empName=" + empName,
+            type: "POST",
+            success: function (result) {
+                if (result.code == 100) {
+                    show_validate_msg("#empName_add_input", "success", "用户名可用。");
+                    $("#emp_save_btn").attr("ajax-va", "success");
+                } else {
+                    show_validate_msg("#empName_add_input", "error", "用户名不可用。");
+                    $("#emp_save_btn").attr("ajax-va", "fail");
+                }
+            }
+        });
     });
 
     var totalRecord;

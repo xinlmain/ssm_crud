@@ -38,6 +38,17 @@ public class EmployeeController {
         return Msg.success();
     }
 
+    @RequestMapping(value = "/checkuser", method = RequestMethod.POST)
+    @ResponseBody
+    public Msg checkUser(String empName) {
+        boolean b = employeeService.checkUser(empName);
+        if (b) {
+            return Msg.success();
+        } else {
+            return Msg.fail();
+        }
+    }
+
     //@RequestMapping("/emps")
     public String getEmps(@RequestParam(value = "pn", defaultValue = "1") Integer pn, Model model) {
 
