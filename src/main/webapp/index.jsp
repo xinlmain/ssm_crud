@@ -234,9 +234,15 @@
         navEle.appendTo("#page_nav_area");
     }
 
+    function reset_form(ele) {
+        $(ele)[0].reset();
+        $(ele).find("*").removeClass("has-error has-success");
+        $(ele).find(".help-block").text("");
+    }
+
     $("#emp_add_modal_btn").click(function () {
 
-        $("#empAddModal form")[0].reset();
+        reset_form("#empAddModal form");
         getDepts();
 
         $("#empAddModal").modal({
@@ -312,8 +318,19 @@
             data: $("#empAddModal form").serialize(),
             success: function (result) {
                 //alert(result.msg);
-                $("#empAddModal").modal("hide");
-                to_page(totalRecord + 1);
+
+                if (result.code == 100) {
+                    $("#empAddModal").modal("hide");
+                    to_page(totalRecord + 1);
+                } else {
+                    //console.log(result);
+                    if (undefined != result.extend.errorFields.email) {
+                        show_validate_msg("#email_add_input", "error", result.extend.errorFields.email);
+                    }
+                    if (undefined != result.extend.errorFields.empName) {
+                        show_validate_msg("#empName_add_input", "error", result.extend.errorFields.empName);
+                    }
+                }
             }
         });
 
@@ -330,7 +347,7 @@
                     show_validate_msg("#empName_add_input", "success", "用户名可用。");
                     $("#emp_save_btn").attr("ajax-va", "success");
                 } else {
-                    show_validate_msg("#empName_add_input", "error", "用户名不可用。");
+                    show_validate_msg("#empName_add_input", "error", result.extend.va_msg);
                     $("#emp_save_btn").attr("ajax-va", "fail");
                 }
             }
