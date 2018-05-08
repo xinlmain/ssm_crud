@@ -32,7 +32,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                <h4 class="modal-title" id="myModalLabel">添加员工</h4>
             </div>
             <div class="modal-body">
                 <form class="form-horizontal">
@@ -72,6 +72,56 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 <button type="button" class="btn btn-primary" id="emp_save_btn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- create employee Modal -->
+<div class="modal fade" id="empUpdateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">修改员工</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="empName_add_input" class="col-sm-2 control-label">empName</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static" id="empName_update_static"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email_add_input" class="col-sm-2 control-label">email</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="email" class="form-control" id="email_update_input" placeholder="email@whatever.com">
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">gender</label>
+                        <div class="col-sm-10">
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" value="M" checked="checked"> 男
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" value="F"> 女
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">deptName</label>
+                        <div class="col-sm-4">
+                            <select class="form-control" name="dId"></select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="emp_update_btn">更新</button>
             </div>
         </div>
     </div>
@@ -154,11 +204,12 @@
             var emailTd = $("<td></td>").append(item.email);
             var deptNameTd = $("<td></td>").append(item.department.deptName);
 
-            var editBtn = $("<button></button>").addClass("btn btn-primary btn-sm")
+            var editBtn = $("<button></button>").addClass("btn btn-primary btn-sm edit_btn")
                 .append($("<span></span>").addClass("glyphicon glyphicon-pencil"))
-                .append("编辑");
+                .append("编辑")
+                .attr("edit-id", item.empId);
 
-            var deleteBtn = $("<button></button>").addClass("btn btn-danger btn-sm")
+            var deleteBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn")
                 .append($("<span></span>").addClass("glyphicon glyphicon-trash"))
                 .append("删除");
 
@@ -243,25 +294,25 @@
     $("#emp_add_modal_btn").click(function () {
 
         reset_form("#empAddModal form");
-        getDepts();
+        getDepts("#empAddModal select");
 
         $("#empAddModal").modal({
             //backdrop: "static"
         });
     });
 
-    function getDepts() {
+    function getDepts(ele) {
+        $(ele).empty();
+
         $.ajax({
            url: "${APP_PATH}/depts",
            type: "GET",
            success: function (result) {
                //console.log(result);
 
-               var select = $("#empAddModal select");
-
                $.each(result.extend.depts, function () {
                   var optionEle = $("<option></option>").append(this.deptName).attr("value", this.deptId);
-                  optionEle.appendTo(select);
+                  optionEle.appendTo(ele);
                });
            }
         });
@@ -353,8 +404,52 @@
             }
         });
     });
+    
+    $(document).on("click", ".edit_btn", function () {
+        getDepts("#empUpdateModal select");
+        getEmp($(this).attr("edit-id"));
 
+        $("#emp_update_btn").attr("edit-id", $(this).attr("edit-id"));
+
+        $("#empUpdateModal").modal();
+    });
+
+    function getEmp(id) {
+        $.ajax({
+            url: "${APP_PATH}/emp/" + id,
+            type: "GET",
+            success: function (result) {
+                var empData = result.extend.emp;
+                $("#empName_update_static").text(empData.empName);
+                $("#email_update_input").val(empData.email);
+                $("#empUpdateModal input[name=gender]").val([empData.gender]);
+                $("#empUpdateModal select").val([empData.dId]);
+            }
+        });
+    }
+    
     var totalRecord;
+
+    $("#emp_update_btn").click(function () {
+        // 验证邮箱
+        var email = $("#email_update_input").val();
+        var regEmail = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+        if (!regEmail.test(email)) {
+            show_validate_msg("#email_update_input", "error", "邮箱格式不正确！");
+            return false;
+        } else {
+            show_validate_msg("#email_update_input", "success", "");
+        }
+
+        $.ajax({
+            url: "${APP_PATH}/emp/" + $(this).attr("edit-id"),
+            type: "POST",
+            data: $("#empUpdateModal form").serialize() + "&_method=PUT",
+            success: function (result) {
+                alert(result.msg);
+            }
+        });
+    });
 </script>
 </body>
 </html>
