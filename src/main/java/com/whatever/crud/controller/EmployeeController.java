@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +38,24 @@ public class EmployeeController {
         return Msg.success();
     }
 
-    @RequestMapping(value = "/emp/{id}", method = RequestMethod.DELETE)
+    /*
+    单个或批量
+     */
+    @RequestMapping(value = "/emp/{ids}", method = RequestMethod.DELETE)
     @ResponseBody
-    public Msg deleteEmpById(@PathVariable Integer id) {
-        employeeService.deleteEmp(id);
+    public Msg deleteEmpById(@PathVariable String ids) {
+        if (ids.contains("-")) {
+            String[] str_ids = ids.split("-");
+            List<Integer> list = new ArrayList<>();
+            for (String s : str_ids) {
+                list.add(Integer.parseInt(s));
+            }
+            employeeService.deleteBatch(list);
+        } else {
+            Integer id = Integer.parseInt(ids);
+            employeeService.deleteEmp(id);
+        }
+
         return Msg.success();
     }
 
