@@ -211,7 +211,8 @@
 
             var deleteBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn")
                 .append($("<span></span>").addClass("glyphicon glyphicon-trash"))
-                .append("删除");
+                .append("删除")
+                .attr("delete-id", item.empId);
 
             var btnTd = $("<td></td>").append(editBtn).append(" ").append(deleteBtn);
 
@@ -231,6 +232,7 @@
             + result.extend.pageInfo.pages + "页，共"
             + result.extend.pageInfo.total + "条记录");
         totalRecord = result.extend.pageInfo.pages;
+        currentPage = result.extend.pageInfo.pageNum;
     }
 
     function build_page_nav(result) {
@@ -427,8 +429,6 @@
             }
         });
     }
-    
-    var totalRecord;
 
     $("#emp_update_btn").click(function () {
         // 验证邮箱
@@ -443,13 +443,33 @@
 
         $.ajax({
             url: "${APP_PATH}/emp/" + $(this).attr("edit-id"),
-            type: "POST",
-            data: $("#empUpdateModal form").serialize() + "&_method=PUT",
+            type: "PUT",
+            data: $("#empUpdateModal form").serialize(), // + "&_method=PUT"
             success: function (result) {
-                alert(result.msg);
+                $("#empUpdateModal").modal("hide");
+
+                to_page(currentPage);
             }
         });
     });
+
+    $(document).on("click", ".delete_btn", function () {
+        // pop up confirm dialog
+        var empName = $(this).parents("tr").find("td:eq(1)").text();
+        if (confirm("确认删除【" + empName + "】吗？")) {
+            $.ajax({
+                url: "${APP_PATH}/emp/" + $(this).attr("delete-id"),
+                type: "DELETE",
+                success: function (result) {
+                    alert(result.msg);
+                    to_page(currentPage);
+                }
+            });
+        }
+
+    });
+
+    var totalRecord, currentPage;
 </script>
 </body>
 </html>

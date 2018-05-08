@@ -47,13 +47,24 @@
     <filter-name>characterEncodingFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-  
+
+  <!-- Tomcat不支持非POST请求解析请求体中的参数。采用这个filter可以将POST方法根据_method转化成PUT或DELETE -->
   <filter>
     <filter-name>hiddenHttpMethodFilter</filter-name>
     <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>hiddenHttpMethodFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <!-- Tomcat不支持非POST请求解析请求体中的参数。采用这个filter可以支持直接PUT -->
+  <filter>
+    <filter-name>httpPutFormContentFilter</filter-name>
+    <filter-class>org.springframework.web.filter.HttpPutFormContentFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>httpPutFormContentFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 

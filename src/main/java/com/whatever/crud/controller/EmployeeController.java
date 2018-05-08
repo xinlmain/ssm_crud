@@ -37,6 +37,13 @@ public class EmployeeController {
         return Msg.success();
     }
 
+    @RequestMapping(value = "/emp/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public Msg deleteEmpById(@PathVariable Integer id) {
+        employeeService.deleteEmp(id);
+        return Msg.success();
+    }
+
     @RequestMapping("/emps")
     @ResponseBody
     public Msg getEmpsWithJson(@RequestParam(value = "pn", defaultValue = "1") Integer pn) {
