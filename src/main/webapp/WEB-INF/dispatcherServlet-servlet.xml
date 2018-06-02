@@ -14,6 +14,9 @@
         <property name="suffix" value=".jsp"/>
     </bean>
 
+    <!-- Spring MVC 搞不定的请求交给容器 -->
     <mvc:default-servlet-handler/>
+
+    <!-- 启用注解驱动的mvc -->
     <mvc:annotation-driven/>
 </beans>
