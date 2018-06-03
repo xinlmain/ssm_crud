@@ -4,4 +4,6 @@ target/
 .idea/libraries/
 .idea/vcs.xml
 .idea/workspace.xml
+.idea/compiler.xml
+.idea/
 *.iml
