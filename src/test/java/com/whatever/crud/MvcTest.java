@@ -1,4 +1,4 @@
-package com.whatever.crud.test;
+package com.whatever.crud;
 
 import com.github.pagehelper.PageInfo;
 import com.whatever.crud.bean.Employee;
@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -30,12 +31,20 @@ public class MvcTest {
     MockMvc mockMvc;
 
     @Before
-    public void  initMockMvc() {
+    public void initMockMvc() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
     @Test
     public void testPage() throws Exception {
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/emps").param("pn", "5"))
+                .andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        System.out.println(response.getContentAsString());
+    }
+
+    @Test
+    public void testPageOld() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/emps").param("pn", "5"))
                 .andReturn();
         MockHttpServletRequest request = result.getRequest();
