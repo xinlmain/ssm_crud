@@ -1,4 +1,4 @@
-package com.whatever.crud.test;
+package com.whatever.crud;
 
 import com.whatever.crud.bean.Department;
 import com.whatever.crud.bean.Employee;
