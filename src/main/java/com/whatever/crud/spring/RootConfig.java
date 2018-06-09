@@ -6,15 +6,15 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -25,17 +25,28 @@ import java.io.IOException;
     excludeFilters = {
         @ComponentScan.Filter (type = FilterType.ANNOTATION, value = Controller.class)
     })
+@EnableTransactionManagement
 public class RootConfig implements EnvironmentAware, ApplicationContextAware {
 
+    // https://stackoverflow.com/questions/19421092/autowired-environment-is-null
+    // Autowire 在显式的bean之后才初始化，所以没法用
     //@Autowired()
     private Environment env;
+
+    // I need the applicationContext to get resources
+    private ApplicationContext applicationContext;
 
     @Override
     public void setEnvironment(final Environment environment) {
         this.env = environment;
     }
 
-    @Bean
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    @Bean()
     public ComboPooledDataSource dataSource() throws PropertyVetoException {
         ComboPooledDataSource dataSource = new ComboPooledDataSource();
         dataSource.setJdbcUrl(env.getProperty("jdbc.jdbcUrl"));
@@ -66,12 +77,12 @@ public class RootConfig implements EnvironmentAware, ApplicationContextAware {
         return new SqlSessionTemplate(sessionFactory().getObject(), ExecutorType.BATCH);
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    @Bean("transactionManager")
+    public DataSourceTransactionManager transactionManager() throws PropertyVetoException {
+        DataSourceTransactionManager tm = new DataSourceTransactionManager();
+        tm.setDataSource(dataSource());
+        return tm;
     }
-
-    private ApplicationContext applicationContext;
 
 //    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 //        <property name="configLocation" value="classpath:mybatis-config.xml"/>
@@ -87,4 +98,22 @@ public class RootConfig implements EnvironmentAware, ApplicationContextAware {
 //        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
 //        <constructor-arg name="executorType" value="BATCH"/>
 //    </bean>
+
+//    <!-- transaction config -->
+//    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" >
+//        <property name="dataSource" ref="pooledDataSource"/>
+//    </bean>
+//
+//    <aop:config>
+//        <aop:pointcut id="txPointcut" expression="execution(* com.whatever.crud.service..*(..))"/>
+//        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>
+//    </aop:config>
+//
+//    <!-- tx:advice 还需要指定 transaction-manager, 只是默认就叫transactionManager -->
+//    <tx:advice id="txAdvice">
+//        <tx:attributes>
+//            <tx:method name="*"/>
+//            <tx:method name="get*" read-only="true"/>
+//        </tx:attributes>
+//    </tx:advice>
 }
