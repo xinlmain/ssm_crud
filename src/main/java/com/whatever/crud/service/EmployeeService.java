@@ -5,10 +5,12 @@ import com.whatever.crud.bean.EmployeeExample;
 import com.whatever.crud.dao.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class EmployeeService {
 
     @Autowired
@@ -33,6 +35,7 @@ public class EmployeeService {
         return count == 0;
     }
 
+    @Transactional(readOnly = true)
     public Employee getEmp(Integer id) {
         return employeeMapper.selectByPrimaryKey(id);
     }
